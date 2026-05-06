@@ -21,7 +21,7 @@
 
 ### 下载运行
 
-1. 从 [Releases](https://github.com/your-repo/releases) 下载最新版本
+1. 从 [Releases]([https://github.com/your-repo/releases](https://github.com/xiaofu02/music-tag-service/releases) 下载最新版本
 2. 运行程序：
 
 ```bash
