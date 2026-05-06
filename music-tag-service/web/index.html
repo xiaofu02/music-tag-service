@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐标签服务</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-brand">
+                <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                </svg>
+                <span class="brand-text">音乐标签服务</span>
+            </div>
+            <div class="header-nav">
+                <button id="btn-go-up" class="btn btn-icon-sm" title="返回上级">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <input type="text" id="path-input" placeholder="输入文件夹路径...">
+                <button id="btn-go-path" class="btn btn-primary btn-sm">前往</button>
+            </div>
+            <div class="header-actions">
+                <span id="status-text" class="status-badge">就绪</span>
+                <button id="btn-settings" class="btn btn-icon-sm" title="设置">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="main-layout">
+            <section class="file-section">
+                <div class="file-toolbar">
+                    <input type="text" id="file-search" placeholder="搜索文件...">
+                    <select id="sort-select" class="sort-select">
+                        <option value="name">名称</option>
+                        <option value="update_time">修改时间</option>
+                        <option value="size">大小</option>
+                    </select>
+                </div>
+                <div class="batch-toolbar">
+                    <button class="btn btn-primary btn-sm" onclick="openAutoTagModal([currentPath])">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        批量刮削
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="openBatchRenameModal()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        批量重命名
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="$('modal-organize').style.display='flex'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        整理
+                    </button>
+                </div>
+                <div id="file-tree" class="file-tree">
+                    <div class="empty-state">加载中...</div>
+                </div>
+            </section>
+
+            <section class="edit-section">
+                <div id="edit-welcome" class="edit-welcome">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                    </svg>
+                    <p>选择一个音乐文件来编辑标签</p>
+                </div>
+
+                <div id="edit-form" class="edit-form" style="display:none">
+                    <div class="edit-top">
+                        <button id="btn-save" class="btn btn-success btn-block">保存信息</button>
+                        <button id="btn-settings-single" class="btn btn-icon-sm" title="设置" onclick="document.getElementById('modal-settings').style.display='flex'">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </button>
+                    </div>
+                    <div class="edit-field">
+                        <label>标题</label>
+                        <div class="field-row">
+                            <input type="text" id="f-title" data-field="title">
+                            <button class="btn btn-accent btn-sm btn-search-field" title="搜索">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="edit-field">
+                        <label>艺术家</label>
+                        <input type="text" id="f-artist" data-field="artist">
+                    </div>
+                    <div class="edit-field">
+                        <label>专辑</label>
+                        <input type="text" id="f-album" data-field="album">
+                    </div>
+                    <div class="edit-field">
+                        <label>专辑艺术家</label>
+                        <input type="text" id="f-albumartist" data-field="album_artist">
+                    </div>
+                    <div class="edit-field">
+                        <label>风格</label>
+                        <select id="f-genre">
+                            <option value="">-- 选择 --</option>
+                            <option>流行</option><option>摇滚</option><option>说唱</option>
+                            <option>民谣</option><option>电子</option><option>爵士</option>
+                            <option>古典</option><option>R&B</option><option>蓝调</option>
+                            <option>乡村</option><option>金属</option><option>朋克</option>
+                        </select>
+                    </div>
+                    <div class="edit-field">
+                        <label>年份</label>
+                        <input type="number" id="f-year" data-field="year">
+                    </div>
+                    <div class="edit-field">
+                        <label>音轨</label>
+                        <input type="text" id="f-track" data-field="track_number" placeholder="1/12">
+                    </div>
+                    <div class="edit-field">
+                        <label>光盘</label>
+                        <input type="text" id="f-disc" data-field="disc_number" placeholder="1/2">
+                    </div>
+                    <div class="edit-field">
+                        <label>歌词</label>
+                        <textarea id="f-lyrics" rows="8" data-field="lyrics"></textarea>
+                    </div>
+                    <div class="edit-field">
+                        <label>专辑封面</label>
+                        <div class="cover-row">
+                            <div class="cover-preview">
+                                <img id="f-cover-img" src="" alt="" style="display:none">
+                                <div id="f-cover-placeholder" class="cover-placeholder">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                </div>
+                            </div>
+                            <div class="cover-btns">
+                                <label class="btn btn-secondary btn-sm">上传<input type="file" id="cover-file-input" accept="image/*" style="display:none"></label>
+                                <button id="btn-remove-cover" class="btn btn-ghost btn-sm">删除</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="edit-field">
+                        <label>时长</label>
+                        <input type="text" id="f-duration" readonly class="input-readonly">
+                    </div>
+                    <div class="edit-field">
+                        <label>比特率</label>
+                        <input type="text" id="f-bitrate" readonly class="input-readonly">
+                    </div>
+                    <div class="edit-field">
+                        <label>文件大小</label>
+                        <input type="text" id="f-filesize" readonly class="input-readonly">
+                    </div>
+                </div>
+            </section>
+
+            <section class="resource-section">
+                <div class="resource-toolbar">
+                    <select id="search-provider">
+                        <option value="netease">网易云音乐</option>
+                        <option value="qmusic">QQ音乐</option>
+                        <option value="kugou">酷狗音乐</option>
+                        <option value="kuwo">酷我音乐</option>
+                        <option value="smart">智能搜索</option>
+                    </select>
+                </div>
+                <div class="search-bar">
+                    <input type="text" id="search-keyword" placeholder="输入关键词搜索...">
+                    <button id="btn-search" class="btn btn-accent btn-sm">搜索</button>
+                </div>
+                <div id="search-results" class="search-results">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <p>搜索音乐以获取标签信息</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="modal-settings" class="modal" style="display:none">
+        <div class="modal-box">
+            <div class="modal-head"><h3>设置</h3><button class="btn-close" onclick="document.getElementById('modal-settings').style.display='none'">&times;</button></div>
+            <div class="modal-scroll">
+                <div class="cfg-group">
+                    <h4>标签来源</h4>
+                    <select id="setting-resource">
+                        <option value="netease">网易云音乐</option>
+                        <option value="qmusic">QQ音乐</option>
+                        <option value="kugou">酷狗音乐</option>
+                        <option value="kuwo">酷我音乐</option>
+                        <option value="smart">智能搜索</option>
+                    </select>
+                </div>
+                <div class="cfg-group">
+                    <h4>自动导入</h4>
+                    <div class="cfg-row"><label>启用自动导入</label><label class="switch"><input type="checkbox" id="auto-import-enabled"><span class="slider"></span></label></div>
+                    <div class="cfg-field"><label>监控路径</label><div class="input-row"><input type="text" id="auto-import-path" placeholder="例如: C:\Music"><button id="btn-browse-import-path" class="btn btn-ghost btn-sm">浏览</button></div></div>
+                    <div class="cfg-field"><label>并发数</label><select id="auto-import-concurrency"><option value="1">1</option><option value="2">2</option><option value="4" selected>4（推荐）</option><option value="8">8</option><option value="16">16</option></select></div>
+                    <div class="cfg-field"><label>匹配模式</label><select id="auto-import-mode"><option value="smart" selected>智能搜索</option><option value="hard">严格模式</option><option value="simple">宽松模式</option></select></div>
+                    <div class="cfg-row"><label>覆盖已有标签</label><label class="switch"><input type="checkbox" id="auto-import-overwrite"><span class="slider"></span></label></div>
+                </div>
+                <div class="cfg-group">
+                    <h4>音乐来源</h4>
+                    <div class="provider-list">
+                        <label class="provider-item"><input type="checkbox" value="netease" checked><span>网易云音乐</span></label>
+                        <label class="provider-item"><input type="checkbox" value="qmusic" checked><span>QQ音乐</span></label>
+                        <label class="provider-item"><input type="checkbox" value="kugou"><span>酷狗音乐</span></label>
+                        <label class="provider-item"><input type="checkbox" value="kuwo"><span>酷我音乐</span></label>
+                    </div>
+                </div>
+                <div class="cfg-group">
+                    <h4>运行状态</h4>
+                    <div id="auto-import-status" class="status-bar"><span class="status-dot"></span><span class="status-label">未启动</span></div>
+                    <div class="status-btns">
+                        <button id="btn-start-auto-import" class="btn btn-primary btn-sm">启动自动导入</button>
+                        <button id="btn-stop-auto-import" class="btn btn-secondary btn-sm" style="display:none">停止</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-foot"><button id="btn-save-settings" class="btn btn-primary">保存</button></div>
+        </div>
+    </div>
+
+    <div id="modal-auto-tag" class="modal" style="display:none">
+        <div class="modal-box">
+            <div class="modal-head"><h3>自动刮削</h3><button class="btn-close" onclick="document.getElementById('modal-auto-tag').style.display='none'">&times;</button></div>
+            <div class="modal-scroll">
+                <div id="auto-tag-scope" class="scope-box"></div>
+                <p class="hint-text">智能搜索: 自动从多个平台搜索并智能匹配结果。<br>严格模式: 根据标题和歌手匹配，准确性更高。<br>宽松模式: 只根据标题匹配，可能存在同名歌曲。</p>
+                <div class="cfg-field"><label>匹配模式</label><select id="auto-mode"><option value="smart" selected>智能搜索</option><option value="hard">严格模式</option><option value="simple">宽松模式</option></select></div>
+                <div class="cfg-field"><label>并发数</label><select id="auto-concurrency"><option value="1">1</option><option value="4" selected>4（推荐）</option><option value="8">8</option><option value="16">16</option></select></div>
+                <div class="cfg-field"><label>音乐来源</label><div class="provider-list"><label class="provider-item"><input type="checkbox" value="netease" checked><span>网易云</span></label><label class="provider-item"><input type="checkbox" value="qmusic" checked><span>QQ音乐</span></label><label class="provider-item"><input type="checkbox" value="kugou"><span>酷狗</span></label><label class="provider-item"><input type="checkbox" value="kuwo"><span>酷我</span></label></div></div>
+                <div class="cfg-row"><label>覆盖已有标签</label><label class="switch"><input type="checkbox" id="auto-overwrite"><span class="slider"></span></label></div>
+            </div>
+            <div class="modal-foot"><button id="btn-run-auto-tag" class="btn btn-primary">开始刮削</button></div>
+        </div>
+    </div>
+
+    <div id="modal-batch-progress" class="modal" style="display:none">
+        <div class="modal-box">
+            <div class="modal-head"><h3>批量刮削进度</h3></div>
+            <div class="modal-scroll">
+                <div class="progress-bar"><div id="batch-progress-bar" class="progress-fill"></div></div>
+                <div id="batch-progress-text" class="progress-text">0 / 0</div>
+                <div class="progress-stats"><span class="stat-ok">成功: <b id="batch-success-count">0</b></span><span class="stat-fail">失败: <b id="batch-fail-count">0</b></span></div>
+                <div id="batch-result-list" class="result-list"></div>
+            </div>
+            <div class="modal-foot"><button id="btn-batch-close" class="btn btn-primary" disabled>关闭</button></div>
+        </div>
+    </div>
+
+    <div id="modal-organize" class="modal" style="display:none">
+        <div class="modal-box">
+            <div class="modal-head"><h3>整理文件夹</h3><button class="btn-close" onclick="document.getElementById('modal-organize').style.display='none'">&times;</button></div>
+            <div class="modal-scroll">
+                <p class="hint-text">整理文件夹，按一级目录、二级目录选定的信息分类</p>
+                <div class="cfg-field"><label>目标根目录</label><input type="text" id="organize-root"></div>
+                <div class="cfg-field"><label>一级目录</label><select id="organize-first"><option value="artist">艺术家</option><option value="album">专辑</option><option value="album_artist">专辑艺术家</option><option value="genre">风格</option><option value="year">年份</option></select></div>
+                <div class="cfg-field"><label>二级目录</label><select id="organize-second"><option value="">无</option><option value="album">专辑</option><option value="artist">艺术家</option><option value="genre">风格</option><option value="year">年份</option></select></div>
+            </div>
+            <div class="modal-foot"><button id="btn-run-organize" class="btn btn-primary">整理</button></div>
+        </div>
+    </div>
+
+    <div id="modal-batch-rename" class="modal" style="display:none">
+        <div class="modal-box">
+            <div class="modal-head"><h3>批量重命名</h3><button class="btn-close" onclick="document.getElementById('modal-batch-rename').style.display='none'">&times;</button></div>
+            <div class="modal-scroll">
+                <div id="rename-scope" class="scope-box"></div>
+                <div class="cfg-field"><label>命名模板</label><input type="text" id="rename-template" value="{artist} - {title}"><div class="hint-text">可用变量: {title} {artist} {album} {year} {track}</div></div>
+                <div class="template-presets">
+                    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rename-template').value='{artist} - {title}'">{artist} - {title}</button>
+                    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rename-template').value='{album} - {artist} - {title}'">{album} - {artist} - {title}</button>
+                    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rename-template').value='{track} - {title}'">{track} - {title}</button>
+                </div>
+            </div>
+            <div class="modal-foot"><button id="btn-run-batch-rename" class="btn btn-primary">开始重命名</button></div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast" style="display:none"></div>
+    <script src="app.js"></script>
+</body>
+</html>

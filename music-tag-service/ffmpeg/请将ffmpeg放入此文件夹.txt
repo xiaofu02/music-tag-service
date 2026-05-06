@@ -1,0 +1,8 @@
+请将 ffmpeg.exe 和 ffprobe.exe 放入此文件夹。
+
+下载地址: https://www.gyan.dev/ffmpeg/builds/ (选择 ffmpeg-release-essentials.zip)
+
+放入后目录结构应为:
+  ffmpeg/
+    ffmpeg.exe
+    ffprobe.exe
