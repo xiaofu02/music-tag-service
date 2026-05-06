@@ -1,0 +1,26 @@
+{
+  "auto_import": {
+    "enabled": true,
+    "watch_path": "C:\\Users\\Fjw19\\Music",
+    "concurrency": 4,
+    "auto_tag": true,
+    "providers": [
+      "netease",
+      "qmusic"
+    ],
+    "mode": "hard",
+    "overwrite": false
+  },
+  "default_settings": {
+    "concurrency": 8,
+    "providers": [
+      "netease",
+      "qmusic"
+    ],
+    "mode": "hard",
+    "overwrite": false,
+    "save_cover": false,
+    "save_lyrics": false
+  },
+  "watch_folders": []
+}
